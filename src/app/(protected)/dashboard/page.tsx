@@ -2,69 +2,137 @@
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import DashboardMetrics from '@/components/dashboard-metrics'
+import DashboardBentoGrid from '@/components/dashboard-bento-grid'
+import NavigationDock from '@/components/navigation-dock'
+import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text'
+import { cn } from '@/lib/utils'
 
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [metricsData, setMetricsData] = useState({
+    outreachThisMonth: 0,
+    replyRate: 0,
+    closedDeals: 0,
+    followUpsDue: 0
+  })
 
   useEffect(() => {
-    async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      setLoading(false)
+    async function loadDashboardData() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+        
+        if (user) {
+          // Load CRM data to calculate metrics
+          const { data: clients } = await supabase
+            .from('crm_clients')
+            .select('*')
+            .eq('user_id', user.id)
+          
+          if (clients) {
+            const currentMonth = new Date().getMonth()
+            const currentYear = new Date().getFullYear()
+            
+            // Calculate metrics from CRM data
+            const thisMonthClients = clients.filter(client => {
+              const createdDate = new Date(client.created_at)
+              return createdDate.getMonth() === currentMonth && 
+                     createdDate.getFullYear() === currentYear
+            })
+            
+            const closedDeals = clients.filter(client => client.status === 'Closed').length
+            const followUpsDue = clients.filter(client => client.status === 'Idle').length
+            
+            // Mock reply rate calculation (you can implement actual tracking)
+            const replyRate = thisMonthClients.length > 0 ? 
+              Math.round((closedDeals / thisMonthClients.length) * 100) : 0
+            
+            setMetricsData({
+              outreachThisMonth: thisMonthClients.length,
+              replyRate: Math.min(replyRate, 100),
+              closedDeals,
+              followUpsDue
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-    getUser()
+    
+    loadDashboardData()
   }, [])
-
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    router.push('/login')
-  }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-          <p className="mt-4">Loading...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-100 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Loading your dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <Button onClick={handleSignOut} variant="outline">
-              Sign Out
-            </Button>
-          </div>
-          
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h2 className="text-lg font-semibold text-blue-900 mb-2">Welcome to Flowly CRM!</h2>
-            <p className="text-blue-700">
-              You have successfully signed in. This is your dashboard where you can manage your CRM data.
-            </p>
-          </div>
-
-          {user && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">User Information</h3>
-              <div className="space-y-2">
-                <p><span className="font-medium">Email:</span> {user.email}</p>
-                <p><span className="font-medium">User ID:</span> {user.id}</p>
-                <p><span className="font-medium">Created:</span> {new Date(user.created_at).toLocaleDateString()}</p>
-                <p><span className="font-medium">Last Sign In:</span> {new Date(user.last_sign_in_at).toLocaleString()}</p>
-              </div>
+    <div className="min-h-screen bg-gray-900 pb-20">
+      {/* Header */}
+      <div className="bg-gray-800 border-b border-gray-700 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <AnimatedShinyText className="text-3xl font-bold">
+                Dashboard
+              </AnimatedShinyText>
+              <p className="text-gray-400 mt-1">
+                Welcome back, {user?.email ? user.email.split('@')[0] : 'User'}!
+              </p>
             </div>
-          )}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg">
+              <p className="text-sm font-medium">Flowly CRM</p>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Metrics Cards */}
+        <DashboardMetrics data={metricsData} />
+        
+        {/* Bento Grid Navigation */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-white mb-6">Quick Navigation</h2>
+          <DashboardBentoGrid />
+        </div>
+        
+        {/* Recent Activity Section */}
+        <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-gray-300">CRM system initialized and ready</span>
+            </div>
+            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-gray-300">Dashboard metrics are being tracked</span>
+            </div>
+            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <span className="text-gray-300">Welcome to your new CRM dashboard!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Navigation Dock */}
+      <NavigationDock />
     </div>
   )
 }

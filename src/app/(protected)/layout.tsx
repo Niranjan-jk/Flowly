@@ -1,5 +1,6 @@
 'use client'
 import AuthGuard from '@/components/auth-guard'
+import { Toaster } from 'sonner'
 
 export default function ProtectedLayout({
   children,
@@ -9,6 +10,7 @@ export default function ProtectedLayout({
   return (
     <AuthGuard>
       {children}
+      <Toaster position="top-right" richColors />
     </AuthGuard>
   )
 }
