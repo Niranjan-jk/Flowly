@@ -23,12 +23,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-dvh grid place-items-center p-6">
-      {/* Wrap your Tailark block in a <form> and connect it */}
-      <form onSubmit={onSubmit} className="w-full max-w-sm">
-        <LoginBlock />
-        {error && <p className="text-red-400 mt-2">{error}</p>}
-      </form>
-    </div>
+    <form onSubmit={onSubmit} className="min-h-dvh">
+      <LoginBlock />
+      {error && <p className="text-red-400 text-center mt-2">{error}</p>}
+    </form>
   )
 }

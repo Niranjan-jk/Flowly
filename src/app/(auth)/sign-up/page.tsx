@@ -16,10 +16,16 @@ export default function SignUpPage() {
     const email = String(fd.get('email') || '')
     const password = String(fd.get('password') || '')
 
+    console.log('SIGNUP form values:', { email, password }) // 👈 debug line
+
     const { error } = await supabase.auth.signUp({ email, password })
     setLoading(false)
-    if (error) setError(error.message)
-    else router.push('/dashboard')
+    if (error) {
+      console.error(error)
+      setError(error.message)
+    } else {
+      router.push('/dashboard')
+    }
   }
 
   return (
