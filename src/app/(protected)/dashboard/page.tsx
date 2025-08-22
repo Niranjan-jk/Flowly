@@ -70,7 +70,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-100 mx-auto"></div>
           <p className="mt-4 text-gray-300">Loading your dashboard...</p>
@@ -80,9 +80,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 pb-20">
+    <div className="min-h-screen pb-20">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 shadow-sm">
+      <div className="border-b border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
@@ -112,7 +112,7 @@ export default function DashboardPage() {
         </div>
         
         {/* Recent Activity Section */}
-        <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
+        <div className="rounded-lg shadow-sm border border-gray-700 p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">

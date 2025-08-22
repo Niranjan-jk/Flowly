@@ -55,7 +55,7 @@ export default function DashboardMetrics({ data }: DashboardMetricsProps) {
         return (
           <ShineBorder
             key={index}
-            className="relative overflow-hidden bg-gray-800 border-gray-700"
+            className="relative overflow-hidden border-gray-700"
             color="#A07CFE"
           >
             <Card className="border-0 shadow-none bg-transparent">

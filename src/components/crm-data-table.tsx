@@ -275,7 +275,7 @@ export function CRMDataTable({ data, onEdit, onDelete, onAddClient, loading }: C
   })
 
   return (
-    <Card className="w-full bg-gray-800 border-gray-700">
+    <Card className="w-full border-gray-700">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-2xl font-bold text-white">CRM Clients</CardTitle>
