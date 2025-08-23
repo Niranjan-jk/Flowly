@@ -1,20 +1,20 @@
-import { Architects_Daughter } from "next/font/google";
+import { Inconsolata } from "next/font/google";
 import { Toaster } from "@/components/sonner";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { CalendarProvider } from "@/components/calendar-context";
 import { Metadata } from "next";
 import "./globals.css";
 
-const fontSans = Architects_Daughter({
+const fontSans = Inconsolata({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-const fontMono = Architects_Daughter({
+const fontMono = Inconsolata({
   variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
