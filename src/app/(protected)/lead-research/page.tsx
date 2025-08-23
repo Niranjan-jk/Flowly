@@ -186,7 +186,7 @@ export default function LeadResearchPage() {
   };
 
   return (
-    <div className="min-h-screen pb-20 bg-gray-900">
+    <div className="min-h-screen pb-20">
       {/* Header */}
       <div className="border-b border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -206,7 +206,7 @@ export default function LeadResearchPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search Section */}
         <div className="mb-8">
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+          <div className=" p-6 rounded-lg border border-gray-700">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="keyword" className="text-white text-lg font-medium">

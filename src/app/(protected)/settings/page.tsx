@@ -138,7 +138,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 bg-gray-900">
+    <div className="min-h-screen pb-20">
       {/* Header */}
       <div className="border-b border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -169,7 +169,7 @@ export default function SettingsPage() {
                     className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
                       activeTab === tab.id
                         ? 'bg-blue-600 text-white'
-                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                        : 'text-gray-400 hover: hover:text-white'
                     }`}
                   >
                     <IconComponent className="h-5 w-5" />
@@ -183,7 +183,7 @@ export default function SettingsPage() {
           {/* Content */}
           <div className="flex-1 space-y-6">
             {activeTab === 'profile' && (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className=" border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white">Profile Information</CardTitle>
                   <CardDescription className="text-gray-400">
@@ -299,7 +299,7 @@ export default function SettingsPage() {
             )}
 
             {activeTab === 'notifications' && (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className=" border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white">Notification Preferences</CardTitle>
                   <CardDescription className="text-gray-400">
@@ -334,7 +334,7 @@ export default function SettingsPage() {
             )}
 
             {activeTab === 'preferences' && (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className=" border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white">Preferences</CardTitle>
                   <CardDescription className="text-gray-400">
@@ -403,7 +403,7 @@ export default function SettingsPage() {
             )}
 
             {activeTab === 'security' && (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className=" border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white">Security Settings</CardTitle>
                   <CardDescription className="text-gray-400">
@@ -444,7 +444,7 @@ export default function SettingsPage() {
             )}
 
             {activeTab === 'account' && (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className=" border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white">Account Settings</CardTitle>
                   <CardDescription className="text-gray-400">
@@ -477,7 +477,7 @@ export default function SettingsPage() {
             )}
 
             {activeTab === 'integrations' && (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className=" border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-white">Integrations</CardTitle>
                   <CardDescription className="text-gray-400">

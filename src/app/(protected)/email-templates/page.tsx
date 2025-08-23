@@ -72,7 +72,7 @@ export default function EmailTemplatesPage() {
     return () => (
       <div className="space-y-4">
         <h4 className="text-lg font-semibold text-white">{template.title}</h4>
-        <div className="bg-gray-800 p-4 rounded-lg">
+        <div className=" p-4 rounded-lg">
           <p className="text-gray-300 text-sm">Subject: {template.subject || 'Email Subject'}</p>
           <div className="mt-3 space-y-2 text-gray-400 text-sm">
             <div dangerouslySetInnerHTML={{ __html: template.content || template.preview }} />
@@ -94,7 +94,7 @@ export default function EmailTemplatesPage() {
       content: () => (
         <div className="space-y-4">
           <h4 className="text-lg font-semibold text-white">Welcome Email Template</h4>
-          <div className="bg-gray-800 p-4 rounded-lg">
+          <div className=" p-4 rounded-lg">
             <p className="text-gray-300 text-sm">Subject: Welcome to [Company Name]!</p>
             <div className="mt-3 space-y-2 text-gray-400 text-sm">
               <p>Hi [Name],</p>
@@ -122,7 +122,7 @@ export default function EmailTemplatesPage() {
       content: () => (
         <div className="space-y-4">
           <h4 className="text-lg font-semibold text-white">Follow-up Email Template</h4>
-          <div className="bg-gray-800 p-4 rounded-lg">
+          <div className=" p-4 rounded-lg">
             <p className="text-gray-300 text-sm">Subject: Following up on our conversation</p>
             <div className="mt-3 space-y-2 text-gray-400 text-sm">
               <p>Hi [Name],</p>
@@ -146,7 +146,7 @@ export default function EmailTemplatesPage() {
       content: () => (
         <div className="space-y-4">
           <h4 className="text-lg font-semibold text-white">Newsletter Template</h4>
-          <div className="bg-gray-800 p-4 rounded-lg">
+          <div className=" p-4 rounded-lg">
             <p className="text-gray-300 text-sm">Subject: [Month] Newsletter - What's New at [Company Name]</p>
             <div className="mt-3 space-y-2 text-gray-400 text-sm">
               <p>Hi [Name],</p>
@@ -180,7 +180,7 @@ export default function EmailTemplatesPage() {
       content: () => (
         <div className="space-y-4">
           <h4 className="text-lg font-semibold text-white">Proposal Email Template</h4>
-          <div className="bg-gray-800 p-4 rounded-lg">
+          <div className=" p-4 rounded-lg">
             <p className="text-gray-300 text-sm">Subject: Proposal for [Project Name]</p>
             <div className="mt-3 space-y-2 text-gray-400 text-sm">
               <p>Dear [Name],</p>
@@ -307,7 +307,7 @@ export default function EmailTemplatesPage() {
               <motion.div
                 layoutId={`card-${active.title}-${id}`}
                 ref={ref}
-                className="w-full max-w-[600px] h-full md:h-fit md:max-h-[90%] flex flex-col bg-gray-800 sm:rounded-3xl overflow-hidden border border-gray-700"
+                className="w-full max-w-[600px] h-full md:h-fit md:max-h-[90%] flex flex-col  sm:rounded-3xl overflow-hidden border border-gray-700"
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
@@ -371,7 +371,7 @@ export default function EmailTemplatesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="animate-pulse">
-                <div className="bg-gray-800 h-48 rounded-lg border border-gray-700"></div>
+                <div className=" h-48 rounded-lg border border-gray-700"></div>
               </div>
             ))}
           </div>
