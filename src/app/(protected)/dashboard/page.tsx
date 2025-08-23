@@ -93,9 +93,6 @@ export default function DashboardPage() {
                 Welcome back, {user?.email ? user.email.split('@')[0] : 'User'}!
               </p>
             </div>
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg">
-              <p className="text-sm font-medium">Flowly CRM</p>
-            </div>
           </div>
         </div>
       </div>
@@ -103,7 +100,6 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Metrics Cards */}
-        <DashboardMetrics data={metricsData} />
         
         {/* Bento Grid Navigation */}
         <div className="mb-8">
@@ -111,7 +107,6 @@ export default function DashboardPage() {
           <DashboardBentoGrid />
         </div>
         
-
       </div>
       
       {/* Navigation Dock */}
