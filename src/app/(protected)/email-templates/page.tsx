@@ -9,139 +9,229 @@ import NavigationDock from '@/components/navigation-dock';
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text';
 import ModernTemplateForm from '@/components/modern-template-form';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { supabase } from '@/lib/supabase';
 
-// Email template data
-const emailTemplates = [
-  {
-    id: "welcome",
-    title: "Welcome Email",
-    description: "Onboard new users with a warm welcome",
-    category: "Onboarding",
-    preview: "Welcome to our platform! We're excited to have you...",
-    content: () => (
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-white">Welcome Email Template</h4>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <p className="text-gray-300 text-sm">Subject: Welcome to [Company Name]!</p>
-          <div className="mt-3 space-y-2 text-gray-400 text-sm">
-            <p>Hi [Name],</p>
-            <p>Welcome to [Company Name]! We're thrilled to have you as part of our community.</p>
-            <p>Here's what you can do next:</p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Complete your profile setup</li>
-              <li>Explore our features</li>
-              <li>Connect with our support team</li>
-            </ul>
-            <p>If you have any questions, don't hesitate to reach out!</p>
-            <p>Best regards,<br/>The [Company Name] Team</p>
-          </div>
-        </div>
-      </div>
-    ),
-    src: "/api/placeholder/300/200"
-  },
-  {
-    id: "followup",
-    title: "Follow-up Email",
-    description: "Re-engage prospects with personalized follow-ups",
-    category: "Sales",
-    preview: "I hope this email finds you well. I wanted to follow up...",
-    content: () => (
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-white">Follow-up Email Template</h4>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <p className="text-gray-300 text-sm">Subject: Following up on our conversation</p>
-          <div className="mt-3 space-y-2 text-gray-400 text-sm">
-            <p>Hi [Name],</p>
-            <p>I hope this email finds you well. I wanted to follow up on our conversation about [Topic].</p>
-            <p>Based on what we discussed, I believe [Solution] could be a great fit for [Company Name].</p>
-            <p>Would you be available for a quick 15-minute call this week to discuss next steps?</p>
-            <p>Looking forward to hearing from you.</p>
-            <p>Best regards,<br/>[Your Name]</p>
-          </div>
-        </div>
-      </div>
-    ),
-    src: "/api/placeholder/300/200"
-  },
-  {
-    id: "newsletter",
-    title: "Newsletter Template",
-    description: "Keep your audience engaged with regular updates",
-    category: "Marketing",
-    preview: "This month's highlights and upcoming events...",
-    content: () => (
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-white">Newsletter Template</h4>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <p className="text-gray-300 text-sm">Subject: [Month] Newsletter - What's New at [Company Name]</p>
-          <div className="mt-3 space-y-2 text-gray-400 text-sm">
-            <p>Hi [Name],</p>
-            <p>Here's what's been happening at [Company Name] this month:</p>
-            <div className="space-y-2">
-              <h5 className="font-semibold text-gray-300">🚀 New Features</h5>
-              <p>[Feature 1 description]</p>
-              <p>[Feature 2 description]</p>
-              
-              <h5 className="font-semibold text-gray-300">📅 Upcoming Events</h5>
-              <p>[Event 1] - [Date]</p>
-              <p>[Event 2] - [Date]</p>
-              
-              <h5 className="font-semibold text-gray-300">💡 Tips & Tricks</h5>
-              <p>[Helpful tip for users]</p>
-            </div>
-            <p>Thank you for being part of our community!</p>
-            <p>Best regards,<br/>The [Company Name] Team</p>
-          </div>
-        </div>
-      </div>
-    ),
-    src: "/api/placeholder/300/200"
-  },
-  {
-    id: "proposal",
-    title: "Proposal Email",
-    description: "Present your solutions professionally",
-    category: "Sales",
-    preview: "Thank you for considering us for your project...",
-    content: () => (
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-white">Proposal Email Template</h4>
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <p className="text-gray-300 text-sm">Subject: Proposal for [Project Name]</p>
-          <div className="mt-3 space-y-2 text-gray-400 text-sm">
-            <p>Dear [Name],</p>
-            <p>Thank you for considering [Company Name] for your [Project Type] project.</p>
-            <p>Based on our discussions, I've prepared a detailed proposal that outlines:</p>
-            <ul className="list-disc list-inside ml-4 space-y-1">
-              <li>Project scope and deliverables</li>
-              <li>Timeline and milestones</li>
-              <li>Investment required</li>
-              <li>Our team and approach</li>
-            </ul>
-            <p>Please find the attached proposal document for your review.</p>
-            <p>I'm available to discuss any questions or modifications you might have.</p>
-            <p>Best regards,<br/>[Your Name]</p>
-          </div>
-        </div>
-      </div>
-    ),
-    src: "/api/placeholder/300/200"
-  }
-];
+// Email template interface
+interface EmailTemplate {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  preview: string;
+  content: string | (() => React.ReactNode);
+  src?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export default function EmailTemplatesPage() {
-  const [active, setActive] = useState<(typeof emailTemplates)[number] | boolean | null>(null);
+  const [active, setActive] = useState<EmailTemplate | boolean | null>(null);
   const [showAddTemplate, setShowAddTemplate] = useState(false);
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const id = useId();
   const ref = useRef<HTMLDivElement>(null);
 
+  // Fetch email templates from Supabase
+  useEffect(() => {
+    fetchEmailTemplates();
+  }, []);
+
+  const fetchEmailTemplates = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('email_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching templates:', error);
+        // Fall back to static data if table doesn't exist
+        setEmailTemplates(getDefaultTemplates());
+      } else {
+        // Convert database data to component format
+        const formattedTemplates = data.map((template: any) => ({
+          ...template,
+          content: createTemplateContent(template)
+        }));
+        setEmailTemplates(formattedTemplates.length > 0 ? formattedTemplates : getDefaultTemplates());
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      // Fall back to static data
+      setEmailTemplates(getDefaultTemplates());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create template content component
+  const createTemplateContent = (template: any) => {
+    return () => (
+      <div className="space-y-4">
+        <h4 className="text-lg font-semibold text-white">{template.title}</h4>
+        <div className="bg-gray-800 p-4 rounded-lg">
+          <p className="text-gray-300 text-sm">Subject: {template.subject || 'Email Subject'}</p>
+          <div className="mt-3 space-y-2 text-gray-400 text-sm">
+            <div dangerouslySetInnerHTML={{ __html: template.content || template.preview }} />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Default templates fallback
+  // Default templates fallback
+  const getDefaultTemplates = (): EmailTemplate[] => [
+    {
+      id: "welcome",
+      title: "Welcome Email",
+      description: "Onboard new users with a warm welcome",
+      category: "Onboarding",
+      preview: "Welcome to our platform! We're excited to have you...",
+      content: () => (
+        <div className="space-y-4">
+          <h4 className="text-lg font-semibold text-white">Welcome Email Template</h4>
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <p className="text-gray-300 text-sm">Subject: Welcome to [Company Name]!</p>
+            <div className="mt-3 space-y-2 text-gray-400 text-sm">
+              <p>Hi [Name],</p>
+              <p>Welcome to [Company Name]! We're thrilled to have you as part of our community.</p>
+              <p>Here's what you can do next:</p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li>Complete your profile setup</li>
+                <li>Explore our features</li>
+                <li>Connect with our support team</li>
+              </ul>
+              <p>If you have any questions, don't hesitate to reach out!</p>
+              <p>Best regards,<br/>The [Company Name] Team</p>
+            </div>
+          </div>
+        </div>
+      ),
+      src: "/api/placeholder/300/200"
+    },
+    {
+      id: "followup",
+      title: "Follow-up Email",
+      description: "Re-engage prospects with personalized follow-ups",
+      category: "Sales",
+      preview: "I hope this email finds you well. I wanted to follow up...",
+      content: () => (
+        <div className="space-y-4">
+          <h4 className="text-lg font-semibold text-white">Follow-up Email Template</h4>
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <p className="text-gray-300 text-sm">Subject: Following up on our conversation</p>
+            <div className="mt-3 space-y-2 text-gray-400 text-sm">
+              <p>Hi [Name],</p>
+              <p>I hope this email finds you well. I wanted to follow up on our conversation about [Topic].</p>
+              <p>Based on what we discussed, I believe [Solution] could be a great fit for [Company Name].</p>
+              <p>Would you be available for a quick 15-minute call this week to discuss next steps?</p>
+              <p>Looking forward to hearing from you.</p>
+              <p>Best regards,<br/>[Your Name]</p>
+            </div>
+          </div>
+        </div>
+      ),
+      src: "/api/placeholder/300/200"
+    },
+    {
+      id: "newsletter",
+      title: "Newsletter Template",
+      description: "Keep your audience engaged with regular updates",
+      category: "Marketing",
+      preview: "This month's highlights and upcoming events...",
+      content: () => (
+        <div className="space-y-4">
+          <h4 className="text-lg font-semibold text-white">Newsletter Template</h4>
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <p className="text-gray-300 text-sm">Subject: [Month] Newsletter - What's New at [Company Name]</p>
+            <div className="mt-3 space-y-2 text-gray-400 text-sm">
+              <p>Hi [Name],</p>
+              <p>Here's what's been happening at [Company Name] this month:</p>
+              <div className="space-y-2">
+                <h5 className="font-semibold text-gray-300">🚀 New Features</h5>
+                <p>[Feature 1 description]</p>
+                <p>[Feature 2 description]</p>
+                
+                <h5 className="font-semibold text-gray-300">📅 Upcoming Events</h5>
+                <p>[Event 1] - [Date]</p>
+                <p>[Event 2] - [Date]</p>
+                
+                <h5 className="font-semibold text-gray-300">💡 Tips & Tricks</h5>
+                <p>[Helpful tip for users]</p>
+              </div>
+              <p>Thank you for being part of our community!</p>
+              <p>Best regards,<br/>The [Company Name] Team</p>
+            </div>
+          </div>
+        </div>
+      ),
+      src: "/api/placeholder/300/200"
+    },
+    {
+      id: "proposal",
+      title: "Proposal Email",
+      description: "Present your solutions professionally",
+      category: "Sales",
+      preview: "Thank you for considering us for your project...",
+      content: () => (
+        <div className="space-y-4">
+          <h4 className="text-lg font-semibold text-white">Proposal Email Template</h4>
+          <div className="bg-gray-800 p-4 rounded-lg">
+            <p className="text-gray-300 text-sm">Subject: Proposal for [Project Name]</p>
+            <div className="mt-3 space-y-2 text-gray-400 text-sm">
+              <p>Dear [Name],</p>
+              <p>Thank you for considering [Company Name] for your [Project Type] project.</p>
+              <p>Based on our discussions, I've prepared a detailed proposal that outlines:</p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li>Project scope and deliverables</li>
+                <li>Timeline and milestones</li>
+                <li>Investment required</li>
+                <li>Our team and approach</li>
+              </ul>
+              <p>Please find the attached proposal document for your review.</p>
+              <p>I'm available to discuss any questions or modifications you might have.</p>
+              <p>Best regards,<br/>[Your Name]</p>
+            </div>
+          </div>
+        </div>
+      ),
+      src: "/api/placeholder/300/200"
+    }
+  ];
+
   const handleSaveTemplate = async (templateData: any) => {
-    // Here you would typically save to your backend/database
-    console.log('Saving template:', templateData);
-    // For now, just close the dialog
+    try {
+      // Try to save to Supabase
+      const { data, error } = await supabase
+        .from('email_templates')
+        .insert([
+          {
+            title: templateData.title,
+            description: templateData.description,
+            category: templateData.category,
+            preview: templateData.preview,
+            content: templateData.content,
+            subject: templateData.subject
+          }
+        ]);
+
+      if (error) {
+        console.error('Error saving template:', error);
+        // For now, just show a console message - you can add proper error handling
+      } else {
+        console.log('Template saved successfully:', data);
+        // Refresh the templates list
+        fetchEmailTemplates();
+      }
+    } catch (err) {
+      console.error('Error saving template:', err);
+    }
+    
     setShowAddTemplate(false);
-    // You could also add the template to local state and refresh the list
   };
 
   useEffect(() => {
@@ -277,47 +367,57 @@ export default function EmailTemplatesPage() {
         </AnimatePresence>
 
         {/* Templates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {emailTemplates.map((template) => (
-            <motion.div
-              key={template.id}
-              layoutId={`card-${template.title}-${id}`}
-              onClick={() => setActive(template)}
-              className="cursor-pointer"
-            >
-              <MagicCard className="h-full p-6 hover:scale-105 transition-transform duration-200">
-                <div className="flex flex-col h-full">
-                  <div className="flex-1">
-                    <motion.h3
-                      layoutId={`title-${template.title}-${id}`}
-                      className="text-lg font-semibold text-white mb-2"
-                    >
-                      {template.title}
-                    </motion.h3>
-                    <motion.p
-                      layoutId={`description-${template.description}-${id}`}
-                      className="text-gray-400 text-sm mb-3"
-                    >
-                      {template.description}
-                    </motion.p>
-                    <span className="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded-full mb-3">
-                      {template.category}
-                    </span>
-                    <p className="text-gray-500 text-xs italic">
-                      "{template.preview}"
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-gray-700">
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Click to preview</span>
-                      <span>→</span>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-gray-800 h-48 rounded-lg border border-gray-700"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {emailTemplates.map((template) => (
+              <motion.div
+                key={template.id}
+                layoutId={`card-${template.title}-${id}`}
+                onClick={() => setActive(template)}
+                className="cursor-pointer"
+              >
+                <MagicCard className="h-full p-6 hover:scale-105 transition-transform duration-200 rounded-lg border border-gray-700">
+                  <div className="flex flex-col h-full">
+                    <div className="flex-1">
+                      <motion.h3
+                        layoutId={`title-${template.title}-${id}`}
+                        className="text-lg font-semibold text-white mb-2"
+                      >
+                        {template.title}
+                      </motion.h3>
+                      <motion.p
+                        layoutId={`description-${template.description}-${id}`}
+                        className="text-gray-400 text-sm mb-3"
+                      >
+                        {template.description}
+                      </motion.p>
+                      <span className="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded-full mb-3">
+                        {template.category}
+                      </span>
+                      <p className="text-gray-500 text-xs italic">
+                        "{template.preview}"
+                      </p>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-gray-700">
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Click to preview</span>
+                        <span>→</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </MagicCard>
-            </motion.div>
-          ))}
-        </div>
+                </MagicCard>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Navigation Dock */}

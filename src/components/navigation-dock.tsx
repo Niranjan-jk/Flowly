@@ -9,7 +9,9 @@ import {
   Calendar, 
   BarChart3, 
   Settings,
-  LogOut
+  LogOut,
+  Search,
+  Kanban
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
@@ -49,6 +51,18 @@ export default function NavigationDock() {
       isActive: pathname === "/calendar"
     },
     {
+      icon: Kanban,
+      label: "Kanban Board",
+      href: "/kanban",
+      isActive: pathname === "/kanban"
+    },
+    {
+      icon: Search,
+      label: "Lead Research",
+      href: "/lead-research",
+      isActive: pathname === "/lead-research"
+    },
+    {
       icon: BarChart3,
       label: "Analytics",
       href: "/analytics",
@@ -57,8 +71,8 @@ export default function NavigationDock() {
     {
       icon: Settings,
       label: "Settings",
-      href: "/profile",
-      isActive: pathname === "/profile"
+      href: "/settings",
+      isActive: pathname === "/settings"
     }
   ]
 
