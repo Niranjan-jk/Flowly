@@ -19,7 +19,7 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
+} from "@/components/sidebar";
 import SidebarCalendar from "@/components/sidebar-calendar";
 import { Checkbox } from "@/components/checkbox";
 

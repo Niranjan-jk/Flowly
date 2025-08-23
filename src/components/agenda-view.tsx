@@ -9,7 +9,7 @@ import {
   CalendarEvent,
   EventItem,
   getAgendaEventsForDay,
-} from "@/components/event-calendar";
+} from "@/components";
 
 interface AgendaViewProps {
   currentDate: Date;
