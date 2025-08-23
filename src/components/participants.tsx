@@ -1,44 +1,52 @@
-import { Button } from "@/components/ui/button";
-import { RiMoreFill } from "@remixicon/react";
+"use client";
 
-export default function Participants() {
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { User } from '@supabase/supabase-js';
+
+export default function UserDisplay() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="h-6 w-6 bg-gray-700 rounded-full animate-pulse" />
+        <div className="h-4 w-20 bg-gray-700 rounded animate-pulse" />
+      </div>
+    );
+  }
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+
   return (
-    <div className="flex -space-x-[0.45rem]">
-      <img
-        className="ring-background rounded-full ring-1"
-        src="https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/exp1/avatar-40-16_zn3ygb.jpg"
-        width={24}
-        height={24}
-        alt="Avatar 01"
-      />
-      <img
-        className="ring-background rounded-full ring-1"
-        src="https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/exp1/avatar-40-10_qyybkj.jpg"
-        width={24}
-        height={24}
-        alt="Avatar 02"
-      />
-      <img
-        className="ring-background rounded-full ring-1"
-        src="https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/exp1/avatar-40-15_fguzbs.jpg"
-        width={24}
-        height={24}
-        alt="Avatar 03"
-      />
-      <img
-        className="ring-background rounded-full ring-1"
-        src="https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/exp1/avatar-40-11_jtjhsp.jpg"
-        width={24}
-        height={24}
-        alt="Avatar 04"
-      />
-      <Button
-        variant="outline"
-        className="flex size-6 items-center justify-center rounded-full text-xs ring-1 ring-background border-transparent shadow-none text-muted-foreground/80 dark:bg-background dark:hover:bg-background dark:border-transparent"
-        size="icon"
-      >
-        <RiMoreFill className="size-4" size={16} />
-      </Button>
+    <div className="flex items-center gap-2">
+      <Avatar className="h-6 w-6">
+        <AvatarImage src={user?.user_metadata?.avatar_url} />
+        <AvatarFallback className="bg-blue-600 text-white text-xs">
+          {initials}
+        </AvatarFallback>
+      </Avatar>
+      <span className="text-sm text-gray-300 hidden sm:inline">
+        {displayName}
+      </span>
     </div>
   );
 }

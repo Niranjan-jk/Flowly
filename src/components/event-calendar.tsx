@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger, useSidebar } from "@/components/sidebar";
 import ThemeToggle from "@/components/theme-toggle";
-import Participants from "@/components/participants";
+import UserDisplay from "@/components/participants";
 
 export interface EventCalendarProps {
   events?: CalendarEvent[];
@@ -293,7 +293,7 @@ export function EventCalendar({
                 {viewTitle}
               </h2>
             </div>
-            <Participants />
+            <UserDisplay />
           </div>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center justify-between gap-2">
