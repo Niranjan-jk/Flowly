@@ -111,24 +111,7 @@ export default function DashboardPage() {
           <DashboardBentoGrid />
         </div>
         
-        {/* Recent Activity Section */}
-        <div className="rounded-lg shadow-sm border border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-gray-300">CRM system initialized and ready</span>
-            </div>
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-300">Dashboard metrics are being tracked</span>
-            </div>
-            <div className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span className="text-gray-300">Welcome to your new CRM dashboard!</span>
-            </div>
-          </div>
-        </div>
+
       </div>
       
       {/* Navigation Dock */}
