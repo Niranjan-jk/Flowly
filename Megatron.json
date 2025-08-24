@@ -1,0 +1,462 @@
+{
+  "name": "Megatron",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-research",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "e7092e4c-9a99-41fb-9003-b00ae46d80da",
+      "name": "Webhook (Flowly Lead Research)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        -16
+      ],
+      "webhookId": "a6fd75b8-81ca-4002-b17e-cce580bf6769"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "keyword",
+              "value": "={{$json.body?.keyword || $json.query?.q || $json.keyword || ''}}"
+            }
+          ],
+          "boolean": [
+            {
+              "name": "strict_recent",
+              "value": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "32115861-21c5-4031-a3ac-c822bcdd198a",
+      "name": "Set Keyword",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/search",
+        "options": {
+          "response": {}
+        }
+      },
+      "id": "84e74475-392a-4a64-9f5b-12fbb7ed50ef",
+      "name": "YouTube Search (last 7 days, 50)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -800,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "language": "JavaScript"
+      },
+      "id": "51649814-950e-4b57-9bef-0f2f836c1180",
+      "name": "Extract IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -544,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/videos",
+        "options": {
+          "response": {}
+        }
+      },
+      "id": "fd6fe8f3-9348-4068-b643-2698777b8f57",
+      "name": "YouTube videos.list",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -304,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/channels",
+        "options": {
+          "response": {}
+        }
+      },
+      "id": "67dca6dd-2190-478a-ab7c-cc4c5c5a77fa",
+      "name": "YouTube channels.list",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -304,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "language": "JavaScript"
+      },
+      "id": "699e250d-0d23-4ef8-8f92-d6e24849b5fd",
+      "name": "Assemble & Dedup (by channel)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "language": "JavaScript"
+      },
+      "id": "7eae4d59-4ac5-451f-9d14-2638d8e8165c",
+      "name": "Rule Filter (non-IN, subs<10k, HD)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "batching": {},
+          "response": {}
+        }
+      },
+      "id": "7a93cd74-9a30-476d-abe9-b41704c98eae",
+      "name": "AI: Rank Quality (0–100)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        464,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "language": "JavaScript"
+      },
+      "id": "bf595082-16bf-4e42-ac2e-3efc0324870b",
+      "name": "Filter by Quality (>=60)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "language": "JavaScript"
+      },
+      "id": "6e04d283-e6f8-4e52-a5e2-797bd47f65a7",
+      "name": "Extract Socials (email + links)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "batching": {},
+          "response": {}
+        }
+      },
+      "id": "ed1c9315-606e-4bfc-b6aa-c3ae34b1ffd2",
+      "name": "AI: Summarize + Budget Score",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1184,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "language": "JavaScript"
+      },
+      "id": "225a9501-6e7c-490f-ad99-ede75ca4b47c",
+      "name": "Shape Lead Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "673d9787-e326-4043-b4d5-a2c716607a87",
+      "name": "Aggregate → Array",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        -96
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "7f2609c3-f7e6-4f4e-a97a-7cf3e29d520a",
+      "name": "Google Sheets: Append",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 6,
+      "position": [
+        2176,
+        80
+      ],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "5339f4f9-b13f-439f-be64-772cb2cb33d5",
+      "name": "Respond to Webhook (JSON array)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        496,
+        -368
+      ],
+      "id": "0ea41f0e-b66b-4120-9c01-3b921231494e",
+      "name": "OpenRouter Chat Model"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook (Flowly Lead Research)": {
+      "main": [
+        [
+          {
+            "node": "Set Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Keyword": {
+      "main": [
+        [
+          {
+            "node": "YouTube Search (last 7 days, 50)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Search (last 7 days, 50)": {
+      "main": [
+        [
+          {
+            "node": "Extract IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract IDs": {
+      "main": [
+        [
+          {
+            "node": "YouTube videos.list",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "YouTube channels.list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube videos.list": {
+      "main": [
+        [
+          {
+            "node": "Assemble & Dedup (by channel)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube channels.list": {
+      "main": [
+        [
+          {
+            "node": "Assemble & Dedup (by channel)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble & Dedup (by channel)": {
+      "main": [
+        [
+          {
+            "node": "Rule Filter (non-IN, subs<10k, HD)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rule Filter (non-IN, subs<10k, HD)": {
+      "main": [
+        [
+          {
+            "node": "AI: Rank Quality (0–100)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Rank Quality (0–100)": {
+      "main": [
+        [
+          {
+            "node": "Filter by Quality (>=60)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter by Quality (>=60)": {
+      "main": [
+        [
+          {
+            "node": "Extract Socials (email + links)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Socials (email + links)": {
+      "main": [
+        [
+          {
+            "node": "AI: Summarize + Budget Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Summarize + Budget Score": {
+      "main": [
+        [
+          {
+            "node": "Shape Lead Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape Lead Output": {
+      "main": [
+        [
+          {
+            "node": "Aggregate → Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate → Array": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook (JSON array)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1428f74f-3ab4-45b6-a355-a0a3fbdfba55",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "fFCESVYBE9GmdbjX",
+  "tags": []
+}
