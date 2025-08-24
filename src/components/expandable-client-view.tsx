@@ -63,13 +63,13 @@ export function ExpandableClientView({ client, isOpen, onClose, onEdit }: Expand
           <div className="fixed inset-0 grid place-items-center z-[100] p-4">
             <motion.div
               ref={ref}
-              className="w-full max-w-4xl max-h-[90vh] overflow-auto bg-gray-900 rounded-3xl border border-gray-700"
+              className="w-full max-w-4xl max-h-[90vh] overflow-auto  rounded-3xl border border-gray-700"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
             >
               {/* Header */}
-              <div className="bg-gray-900/95 border-b border-gray-700 p-6">
+              <div className="/95 border-b border-gray-700 p-6">
                 <div className="flex justify-between items-start">
                   <div className="space-y-2">
                     <h2 className="text-2xl font-bold text-white">{client.channel_name}</h2>

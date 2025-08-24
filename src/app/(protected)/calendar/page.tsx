@@ -7,7 +7,7 @@ import BigCalendar from "@/components/big-calendar";
 
 export default function CalendarPage() {
   return (
-    <div className="min-h-screen pb-20 bg-gray-900">
+    <div className="min-h-screen pb-20 ">
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
