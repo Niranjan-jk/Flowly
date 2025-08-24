@@ -8,8 +8,9 @@ import { useOutsideClick } from "@/hooks/use-outside-click";
 import NavigationDock from '@/components/navigation-dock';
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text';
 import ModernTemplateForm from '@/components/modern-template-form';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 // Email template interface
 interface EmailTemplate {
@@ -41,9 +42,17 @@ export default function EmailTemplatesPage() {
   const fetchEmailTemplates = async () => {
     try {
       setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setEmailTemplates(getDefaultTemplates());
+        return;
+      }
+
       const { data, error } = await supabase
         .from('email_templates')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -205,11 +214,18 @@ export default function EmailTemplatesPage() {
 
   const handleSaveTemplate = async (templateData: any) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('User not authenticated')
+        return
+      }
+
       // Try to save to Supabase
       const { data, error } = await supabase
         .from('email_templates')
         .insert([
           {
+            user_id: user.id,
             title: templateData.title,
             description: templateData.description,
             category: templateData.category,
@@ -221,17 +237,38 @@ export default function EmailTemplatesPage() {
 
       if (error) {
         console.error('Error saving template:', error);
-        // For now, just show a console message - you can add proper error handling
+        toast.error('Failed to save template');
       } else {
         console.log('Template saved successfully:', data);
+        toast.success('Template saved successfully!');
         // Refresh the templates list
         fetchEmailTemplates();
       }
     } catch (err) {
       console.error('Error saving template:', err);
+      toast.error('Failed to save template');
     }
     
     setShowAddTemplate(false);
+  };
+
+  const handleUseTemplate = (template: EmailTemplate) => {
+    // Create email content with template
+    const emailContent = `Subject: ${template.title}\n\n${typeof template.content === 'function' ? template.preview : template.content}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(emailContent).then(() => {
+      toast.success('Template copied to clipboard!');
+      setActive(null);
+    }).catch(() => {
+      toast.error('Failed to copy template');
+    });
+  };
+
+  const handleEditTemplate = (template: EmailTemplate) => {
+    // For now, just show a message - you could implement edit functionality
+    toast.info('Edit functionality coming soon!');
+    setActive(null);
   };
 
   useEffect(() => {
@@ -324,7 +361,7 @@ export default function EmailTemplatesPage() {
                       >
                         {active.description}
                       </motion.p>
-                      <span className="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded-full mt-2">
+                      <span className="inline-block bg-gray-600 text-gray-200 text-xs px-2 py-1 rounded-full mt-2">
                         {active.category}
                       </span>
                     </div>
@@ -334,7 +371,8 @@ export default function EmailTemplatesPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="px-4 py-2 text-sm rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700"
+                        onClick={() => handleUseTemplate(active)}
+                        className="px-4 py-2 text-sm rounded-lg font-medium bg-gray-600 text-white hover:bg-gray-500"
                       >
                         Use Template
                       </motion.button>
@@ -343,6 +381,7 @@ export default function EmailTemplatesPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        onClick={() => handleEditTemplate(active)}
                         className="px-4 py-2 text-sm rounded-lg font-medium bg-gray-700 text-white hover:bg-gray-600"
                       >
                         Edit
@@ -399,7 +438,7 @@ export default function EmailTemplatesPage() {
                       >
                         {template.description}
                       </motion.p>
-                      <span className="inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded-full mb-3">
+                      <span className="inline-block bg-gray-600 text-gray-200 text-xs px-2 py-1 rounded-full mb-3">
                         {template.category}
                       </span>
                       <p className="text-gray-500 text-xs italic">
@@ -426,6 +465,7 @@ export default function EmailTemplatesPage() {
       {/* Add Template Dialog */}
       <Dialog open={showAddTemplate} onOpenChange={setShowAddTemplate}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-transparent border-0">
+          <DialogTitle className="sr-only">Add New Email Template</DialogTitle>
           <ModernTemplateForm 
             onSave={handleSaveTemplate}
             onCancel={() => setShowAddTemplate(false)}

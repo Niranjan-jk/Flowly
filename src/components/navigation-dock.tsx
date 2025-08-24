@@ -7,7 +7,7 @@ import {
   Users, 
   Mail, 
   Calendar, 
-  BarChart3, 
+  Folder, 
   Settings,
   LogOut,
   Search,
@@ -63,10 +63,10 @@ export default function NavigationDock() {
       isActive: pathname === "/lead-research"
     },
     {
-      icon: BarChart3,
-      label: "Analytics",
-      href: "/analytics",
-      isActive: pathname === "/analytics"
+      icon: Folder,
+      label: "Client Documents",
+      href: "/client-docs",
+      isActive: pathname === "/client-docs"
     },
     {
       icon: Settings,

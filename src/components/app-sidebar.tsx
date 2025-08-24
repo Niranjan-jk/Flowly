@@ -5,6 +5,7 @@ import Link from "next/link";
 import { RiCheckLine } from "@remixicon/react";
 import { useCalendarContext } from "@/components/calendar-context";
 import { etiquettes } from "@/components/big-calendar";
+import { supabase } from "@/lib/supabase";
 
 import { NavUser } from "@/components/nav-user";
 import {
@@ -23,17 +24,45 @@ import {
 import SidebarCalendar from "@/components/sidebar-calendar";
 import { Checkbox } from "@/components/checkbox";
 
-const data = {
-  user: {
-    name: "Sofia Safier",
-    email: "sofia@safier.com",
-    avatar:
-      "https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/exp6/user-01_l4if9t.png",
-  },
-};
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isColorVisible, toggleColorVisibility } = useCalendarContext();
+  const [user, setUser] = React.useState<{
+    name: string;
+    email: string;
+    avatar: string;
+  } | null>(null);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          // Extract first name from email or use metadata
+          const firstName = authUser.user_metadata?.first_name || 
+                           authUser.user_metadata?.full_name?.split(' ')[0] ||
+                           authUser.email?.split('@')[0] ||
+                           'User';
+          
+          setUser({
+            name: firstName,
+            email: authUser.email || '',
+            avatar: authUser.user_metadata?.avatar_url || 
+                   `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=3b82f6&color=fff`
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        // Fallback user data
+        setUser({
+          name: 'User',
+          email: 'user@example.com',
+          avatar: 'https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff'
+        });
+      }
+    };
+
+    fetchUser();
+  }, []);
   return (
     <Sidebar
       variant="inset"
@@ -112,7 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   );

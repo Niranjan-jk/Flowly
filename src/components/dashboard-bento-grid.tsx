@@ -9,7 +9,6 @@ import {
   Users, 
   Mail, 
   Calendar, 
-  BarChart3, 
   Settings, 
   FileText,
   Folder,
@@ -50,12 +49,12 @@ export default function DashboardBentoGrid({ className }: BentoGridProps) {
       className: "col-span-3 lg:col-span-1"
     },
     {
-      name: "Analytics Dashboard",
-      description: "View detailed analytics and performance metrics",
+      name: "Client Documents",
+      description: "Organize and manage documents and assets for your clients",
       background: <SkeletonFour />,
-      Icon: BarChart3,
-      href: "/analytics",
-      cta: "View Analytics",
+      Icon: Folder,
+      href: "/client-docs",
+      cta: "Manage Docs",
       className: "col-span-3 lg:col-span-2"
     },
     {

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useEffect, useState } from 'react'
 import { CRMDataTable, CRMClient } from '@/components/crm-data-table'
 import { ClientDialog } from '@/components/client-dialog'
+import { ExpandableClientView } from '@/components/expandable-client-view'
 import NavigationDock from '@/components/navigation-dock'
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text'
 import { toast } from 'sonner'
@@ -14,6 +15,8 @@ export default function CRMPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<CRMClient | null>(null)
   const [saveLoading, setSaveLoading] = useState(false)
+  const [expandedClient, setExpandedClient] = useState<CRMClient | null>(null)
+  const [expandedViewOpen, setExpandedViewOpen] = useState(false)
 
   async function loadClients() {
     setLoading(true)
@@ -76,6 +79,16 @@ export default function CRMPage() {
   const handleEditClient = (client: CRMClient) => {
     setEditingClient(client)
     setDialogOpen(true)
+  }
+
+  const handleClientClick = (client: CRMClient) => {
+    setExpandedClient(client)
+    setExpandedViewOpen(true)
+  }
+
+  const handleCloseExpandedView = () => {
+    setExpandedViewOpen(false)
+    setExpandedClient(null)
   }
 
   const handleDeleteClient = async (id: string) => {
@@ -195,6 +208,7 @@ export default function CRMPage() {
           onEdit={handleEditClient}
           onDelete={handleDeleteClient}
           onAddClient={handleAddClient}
+          onClientClick={handleClientClick}
           loading={loading}
         />
       </div>
@@ -206,6 +220,17 @@ export default function CRMPage() {
         client={editingClient}
         onSave={handleSaveClient}
         loading={saveLoading}
+      />
+      
+      {/* Expandable Client View */}
+      <ExpandableClientView
+        client={expandedClient}
+        isOpen={expandedViewOpen}
+        onClose={handleCloseExpandedView}
+        onEdit={(client) => {
+          handleCloseExpandedView()
+          handleEditClient(client)
+        }}
       />
       
       {/* Navigation Dock */}

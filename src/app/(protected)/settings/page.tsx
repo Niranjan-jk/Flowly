@@ -13,6 +13,7 @@ import { KTUISeparator } from '@/components/ui/ktui-separator';
 import NavigationDock from '@/components/navigation-dock';
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 import { 
   User, 
   Mail, 
@@ -104,17 +105,42 @@ export default function SettingsPage() {
     
     setSaving(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('User not authenticated');
+        return;
+      }
+
+      // Ensure the profile has the correct user_id
+      const profileData = {
+        ...profile,
+        id: user.id,
+        user_id: user.id
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .upsert([profile]);
+        .upsert([profileData], { 
+          onConflict: 'id'
+        });
 
       if (error) {
         console.error('Error saving profile:', error);
+        // Provide more specific error messages
+        if (error.code === '42P01') {
+          toast.error('Profiles table not found. Please contact administrator.');
+        } else if (error.code === '23505') {
+          toast.error('Profile already exists. Try updating instead.');
+        } else {
+          toast.error(`Failed to save profile: ${error.message}`);
+        }
       } else {
         console.log('Profile saved successfully');
+        toast.success('Profile saved successfully!');
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('An error occurred while saving');
     } finally {
       setSaving(false);
     }
@@ -168,8 +194,8 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors ${
                       activeTab === tab.id
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-400 hover: hover:text-white'
+                        ? 'bg-gray-600 text-white'
+                        : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                     }`}
                   >
                     <IconComponent className="h-5 w-5" />
@@ -288,7 +314,7 @@ export default function SettingsPage() {
                     <Button 
                       onClick={handleSaveProfile}
                       disabled={saving}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-gray-600 hover:bg-gray-500"
                     >
                       <Save className="h-4 w-4 mr-2" />
                       {saving ? 'Saving...' : 'Save Changes'}

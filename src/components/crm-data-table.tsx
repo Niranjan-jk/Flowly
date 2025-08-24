@@ -108,10 +108,11 @@ interface CRMDataTableProps {
   onEdit: (client: CRMClient) => void
   onDelete: (id: string) => void
   onAddClient: () => void
+  onClientClick?: (client: CRMClient) => void
   loading?: boolean
 }
 
-export function CRMDataTable({ data, onEdit, onDelete, onAddClient, loading }: CRMDataTableProps) {
+export function CRMDataTable({ data, onEdit, onDelete, onAddClient, onClientClick, loading }: CRMDataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -357,7 +358,8 @@ export function CRMDataTable({ data, onEdit, onDelete, onAddClient, loading }: C
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    className="border-gray-700 hover:bg-gray-700/30"
+                    className="border-gray-700 hover:bg-gray-700/30 cursor-pointer"
+                    onClick={() => onClientClick?.(row.original)}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="text-gray-200">
