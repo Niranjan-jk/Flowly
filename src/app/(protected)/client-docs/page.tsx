@@ -6,21 +6,18 @@ import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text'
 import { RainbowButton } from '@/components/magicui/rainbow-button'
 import { GridPattern } from '@/components/magicui/grid-pattern'
 import NavigationDock from '@/components/navigation-dock'
+import EnhancedFilePreview from '@/components/enhanced-file-preview'
+import UploadLoader from '@/components/upload-loader'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { 
   FolderOpen, 
   Upload, 
-  File, 
-  Image, 
-  Video, 
-  FileText,
+  File,
   Plus,
   ArrowLeft,
   MoreVertical,
-  Download,
-  Trash2,
-  Eye
+  Trash2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -64,6 +61,11 @@ export default function ClientDocsPage() {
   const [newFolderDescription, setNewFolderDescription] = useState('')
   const [folderDialogOpen, setFolderDialogOpen] = useState(false)
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadLoaderVisible, setUploadLoaderVisible] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState<'uploading' | 'success' | 'error'>('uploading')
+  const [uploadingFileName, setUploadingFileName] = useState('')
+  const [uploadingFileType, setUploadingFileType] = useState('')
 
   useEffect(() => {
     loadFolders()
@@ -223,20 +225,6 @@ export default function ClientDocsPage() {
     }
   }
 
-  const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) return Image
-    if (fileType.startsWith('video/')) return Video
-    if (fileType.includes('pdf') || fileType.includes('document')) return FileText
-    return File
-  }
-
-  const formatFileSize = (bytes: number) => {
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    if (bytes === 0) return '0 Bytes'
-    const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
-  }
-
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file || !currentFolder) return
@@ -248,6 +236,14 @@ export default function ClientDocsPage() {
         return
       }
 
+      // Show upload loader
+      setUploadingFileName(file.name)
+      setUploadingFileType(file.type)
+      setUploadProgress(0)
+      setUploadStatus('uploading')
+      setUploadLoaderVisible(true)
+      setUploadDialogOpen(false)
+
       // Validate folder ownership before proceeding
       const { data: folderData, error: folderError } = await supabase
         .from('client_folders')
@@ -258,29 +254,79 @@ export default function ClientDocsPage() {
 
       if (folderError || !folderData) {
         console.error('Folder ownership validation failed:', folderError)
+        setUploadStatus('error')
         toast.error('Access denied: You can only upload to your own folders')
         return
       }
 
-      // Upload file to Supabase Storage
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `client-docs/${user.id}/${currentFolder.id}/${fileName}`
+      // Simulate initial progress
+      setUploadProgress(10)
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('client-files')
-        .upload(filePath, file)
+      // Upload file to Supabase Storage with improved path structure
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      // Try multiple path formats for better RLS compatibility
+      const filePaths = [
+        `${user.id}/${currentFolder.id}/${fileName}`, // Simple user/folder structure
+        `client-docs/${user.id}/${currentFolder.id}/${fileName}`, // Original structure
+        `${user.id}/${fileName}` // Fallback: just user ID
+      ]
+
+      setUploadProgress(30)
+
+      let uploadData = null
+      let uploadError: any = null
+      let usedPath = ''
+      
+      // Try uploading with different path structures
+      for (const filePath of filePaths) {
+        try {
+          const result = await supabase.storage
+            .from('client-files')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: file.type
+            })
+          
+          if (!result.error) {
+            uploadData = result.data
+            usedPath = filePath
+            uploadError = null
+            break
+          } else {
+            uploadError = result.error
+          }
+        } catch (err) {
+          uploadError = err
+          continue
+        }
+      }
 
       if (uploadError) {
-        console.error('Error uploading file:', uploadError)
-        toast.error('Failed to upload file')
+        console.error('Error uploading file with all path structures:', uploadError)
+        setUploadStatus('error')
+        
+        // More specific error handling
+        const errorMessage = uploadError?.message || String(uploadError)
+        if (errorMessage.includes('row-level security')) {
+          toast.error('Storage access denied. Please check if the storage bucket policies are correctly configured.')
+        } else if (errorMessage.includes('duplicate')) {
+          toast.error('A file with this name already exists.')
+        } else {
+          toast.error(`Upload failed: ${errorMessage}`)
+        }
         return
       }
 
-      // Get public URL
+      setUploadProgress(70)
+
+      // Get public URL using the successful path
       const { data: { publicUrl } } = supabase.storage
         .from('client-files')
-        .getPublicUrl(filePath)
+        .getPublicUrl(usedPath)
+
+      setUploadProgress(90)
 
       // Save file record to database
       const { error: dbError } = await supabase
@@ -296,17 +342,40 @@ export default function ClientDocsPage() {
 
       if (dbError) {
         console.error('Error saving file record:', dbError)
-        toast.error(`Failed to save file record: ${dbError.message}`)
+        setUploadStatus('error')
+        
+        // Clean up uploaded file if database insert fails
+        await supabase.storage
+          .from('client-files')
+          .remove([usedPath])
+          
+        if (dbError.message.includes('row-level security')) {
+          toast.error('Database access denied. Please check your permissions.')
+        } else {
+          toast.error(`Failed to save file record: ${dbError.message}`)
+        }
       } else {
+        setUploadProgress(100)
+        setUploadStatus('success')
         toast.success('File uploaded successfully!')
+        
+        // Refresh data
         loadFiles(currentFolder.id)
         loadFolders() // Refresh to update file counts
-        setUploadDialogOpen(false)
+        
+        // Auto-close after 2 seconds on success
+        setTimeout(() => {
+          setUploadLoaderVisible(false)
+        }, 2000)
       }
     } catch (err) {
       console.error('Error:', err)
+      setUploadStatus('error')
       toast.error('Failed to upload file')
     }
+
+    // Reset file input
+    event.target.value = ''
   }
 
   if (loading) {
@@ -515,70 +584,14 @@ export default function ClientDocsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {files.map((file) => {
-                const IconComponent = getFileIcon(file.file_type)
-                const isImage = file.file_type.startsWith('image/')
-                
-                return (
-                  <MagicCard
-                    key={file.id}
-                    className="p-4 hover:scale-105 transition-transform duration-200 relative group"
-                  >
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem asChild>
-                            <a href={file.file_url} target="_blank" rel="noopener noreferrer">
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
-                            </a>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <a href={file.file_url} download={file.name}>
-                              <Download className="h-4 w-4 mr-2" />
-                              Download
-                            </a>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => deleteFile(file.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    
-                    {isImage ? (
-                      <div className="w-full h-32 mb-3 rounded-lg overflow-hidden bg-gray-800">
-                        <img 
-                          src={file.file_url} 
-                          alt={file.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex justify-center mb-3">
-                        <IconComponent className="h-12 w-12 text-gray-400" />
-                      </div>
-                    )}
-                    
-                    <h4 className="text-sm font-medium text-white mb-1 truncate" title={file.name}>
-                      {file.name}
-                    </h4>
-                    <div className="flex justify-between items-center text-xs text-gray-500">
-                      <span>{formatFileSize(file.file_size)}</span>
-                      <span>{new Date(file.created_at).toLocaleDateString()}</span>
-                    </div>
-                  </MagicCard>
-                )
-              })}
+              {files.map((file) => (
+                <EnhancedFilePreview
+                  key={file.id}
+                  file={file}
+                  onDelete={deleteFile}
+                  className="h-full"
+                />
+              ))}
             </div>
           )
         )}
@@ -586,6 +599,16 @@ export default function ClientDocsPage() {
 
       {/* Navigation Dock */}
       <NavigationDock />
+      
+      {/* Upload Loader */}
+      <UploadLoader
+        isVisible={uploadLoaderVisible}
+        progress={uploadProgress}
+        fileName={uploadingFileName}
+        fileType={uploadingFileType}
+        status={uploadStatus}
+        onClose={() => setUploadLoaderVisible(false)}
+      />
     </div>
   )
 }

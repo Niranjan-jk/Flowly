@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import NavigationDock from '@/components/navigation-dock';
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text';
 import { RainbowButton } from '@/components/magicui/rainbow-button';
+import PomodoroTimer from '@/components/pomodoro-timer';
 import { Button } from '@/components/ui/button';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -500,23 +501,35 @@ export default function KanbanPage() {
           <AnimatedShinyText className="text-xl font-semibold">
             ✨ Kanban Board
           </AnimatedShinyText>
-          <RainbowButton
-            onClick={() => {
-              if (columns.length > 0) {
-                openAddTaskDialog(columns[0].id);
-              }
-            }}
-            disabled={columns.length === 0}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Task
-          </RainbowButton>
+          <div className="flex items-center gap-4">
+            <RainbowButton
+              onClick={() => {
+                if (columns.length > 0) {
+                  openAddTaskDialog(columns[0].id);
+                }
+              }}
+              disabled={columns.length === 0}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Task
+            </RainbowButton>
+          </div>
         </div>
       </div>
 
-      {/* Kanban Content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full max-w-7xl mx-auto px-4 py-6">
+      {/* Main Content - Side by Side Layout */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Pomodoro Timer */}
+        <div className="w-96 flex-shrink-0 p-6 border-r border-border bg-gray-950/50">
+          <div className="sticky top-6">
+            <PomodoroTimer />
+          </div>
+        </div>
+        
+        {/* Right Content - Kanban Board */}
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full px-4 py-6 flex justify-center">
+            <div className="w-full max-w-6xl">
           {columns.length > 0 && columns[0]?.id?.startsWith('fallback') && (
             <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <div className="flex items-center">
@@ -607,6 +620,8 @@ export default function KanbanPage() {
               <KanbanBoardExtraMargin />
             </KanbanBoard>
           </KanbanBoardProvider>
+            </div>
+          </div>
         </div>
       </div>
 

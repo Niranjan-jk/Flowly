@@ -59,20 +59,121 @@ CREATE POLICY "Users can only access files in their own folders" ON client_files
 -- Create storage bucket
 INSERT INTO storage.buckets (id, name, public) VALUES ('client-files', 'client-files', true);
 
--- Create policy to allow authenticated users to upload files
+-- First, remove any existing policies to avoid conflicts
+DROP POLICY IF EXISTS "Users can upload files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view own files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update own files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own files" ON storage.objects;
+
+-- OPTION 1: Folder-based policies (try these first)
+-- Upload policy
 CREATE POLICY "Users can upload files" ON storage.objects
   FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'client-files' AND (storage.foldername(name))[1] = auth.uid()::text);
+  WITH CHECK (
+    bucket_id = 'client-files' AND 
+    auth.uid() IS NOT NULL AND
+    (
+      -- Allow if the path starts with user ID
+      (storage.foldername(name))[1] = auth.uid()::text OR
+      -- Allow if the path contains the user ID anywhere
+      name ~ ('^client-docs/' || auth.uid()::text || '/') OR
+      -- Allow direct uploads to user folder
+      name ~ ('^' || auth.uid()::text || '/')
+    )
+  );
 
--- Create policy to allow users to view their own files
+-- View policy
 CREATE POLICY "Users can view own files" ON storage.objects
   FOR SELECT TO authenticated
-  USING (bucket_id = 'client-files' AND (storage.foldername(name))[1] = auth.uid()::text);
+  USING (
+    bucket_id = 'client-files' AND 
+    auth.uid() IS NOT NULL AND
+    (
+      (storage.foldername(name))[1] = auth.uid()::text OR
+      name ~ ('^client-docs/' || auth.uid()::text || '/') OR
+      name ~ ('^' || auth.uid()::text || '/')
+    )
+  );
 
--- Create policy to allow users to delete their own files
+-- Update policy
+CREATE POLICY "Users can update own files" ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (
+    bucket_id = 'client-files' AND 
+    auth.uid() IS NOT NULL AND
+    (
+      (storage.foldername(name))[1] = auth.uid()::text OR
+      name ~ ('^client-docs/' || auth.uid()::text || '/') OR
+      name ~ ('^' || auth.uid()::text || '/')
+    )
+  )
+  WITH CHECK (
+    bucket_id = 'client-files' AND 
+    auth.uid() IS NOT NULL AND
+    (
+      (storage.foldername(name))[1] = auth.uid()::text OR
+      name ~ ('^client-docs/' || auth.uid()::text || '/') OR
+      name ~ ('^' || auth.uid()::text || '/')
+    )
+  );
+
+-- Delete policy
 CREATE POLICY "Users can delete own files" ON storage.objects
   FOR DELETE TO authenticated
-  USING (bucket_id = 'client-files' AND (storage.foldername(name))[1] = auth.uid()::text);
+  USING (
+    bucket_id = 'client-files' AND 
+    auth.uid() IS NOT NULL AND
+    (
+      (storage.foldername(name))[1] = auth.uid()::text OR
+      name ~ ('^client-docs/' || auth.uid()::text || '/') OR
+      name ~ ('^' || auth.uid()::text || '/')
+    )
+  );
+
+-- OPTION 2: If the above policies still cause issues, use these simpler ones
+-- Uncomment these if folder-based policies don't work:
+
+/*
+-- Simple upload policy (allows all authenticated users)
+CREATE POLICY "Allow authenticated uploads" ON storage.objects
+  FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'client-files');
+
+-- Simple view policy
+CREATE POLICY "Allow authenticated access" ON storage.objects
+  FOR SELECT TO authenticated
+  USING (bucket_id = 'client-files');
+
+-- Simple update policy
+CREATE POLICY "Allow authenticated updates" ON storage.objects
+  FOR UPDATE TO authenticated
+  USING (bucket_id = 'client-files')
+  WITH CHECK (bucket_id = 'client-files');
+
+-- Simple delete policy
+CREATE POLICY "Allow authenticated deletes" ON storage.objects
+  FOR DELETE TO authenticated
+  USING (bucket_id = 'client-files');
+*/
+
+-- OPTION 3: Alternative policy structure if needed
+-- Use this if the storage.foldername function doesn't work as expected:
+
+/*
+CREATE POLICY "Users can manage their files" ON storage.objects
+  FOR ALL TO authenticated
+  USING (
+    bucket_id = 'client-files' AND
+    auth.uid() IS NOT NULL AND
+    -- Check if the file path contains the user's ID
+    position(auth.uid()::text in name) > 0
+  )
+  WITH CHECK (
+    bucket_id = 'client-files' AND
+    auth.uid() IS NOT NULL AND
+    position(auth.uid()::text in name) > 0
+  );
+*/
 ```
 
 ## Features Included
