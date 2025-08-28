@@ -111,7 +111,7 @@ export default function DashboardBentoGrid({ className }: BentoGridProps) {
 
 const SkeletonOne = () => {
   return (
-    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
+    <div className="flex flex-1 w-full h-full min-h-[12rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
       <Ripple />
     </div>
   )
@@ -119,7 +119,7 @@ const SkeletonOne = () => {
 
 const SkeletonTwo = () => {
   return (
-    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
+    <div className="flex flex-1 w-full h-full min-h-[12rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
       <DotPattern
         className={cn(
           "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
@@ -131,7 +131,7 @@ const SkeletonTwo = () => {
 
 const SkeletonThree = () => {
   return (
-    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
+    <div className="flex flex-1 w-full h-full min-h-[12rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
       <GridPattern
         squares={[
           [4, 4],
@@ -158,7 +158,7 @@ const SkeletonThree = () => {
 
 const SkeletonFour = () => {
   return (
-    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
+    <div className="flex flex-1 w-full h-full min-h-[12rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
       <Ripple />
     </div>
   )
@@ -166,7 +166,7 @@ const SkeletonFour = () => {
 
 const SkeletonFive = () => {
   return (
-    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
+    <div className="flex flex-1 w-full h-full min-h-[12rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
       <DotPattern
         className={cn(
           "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
@@ -178,7 +178,7 @@ const SkeletonFive = () => {
 
 const SkeletonSix = () => {
   return (
-    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
+    <div className="flex flex-1 w-full h-full min-h-[12rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
       <GridPattern
         squares={[
           [3, 7],
@@ -205,7 +205,7 @@ const SkeletonSix = () => {
 
 const SkeletonSeven = () => {
   return (
-    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
+    <div className="flex flex-1 w-full h-full min-h-[12rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
       <Ripple />
     </div>
   )
