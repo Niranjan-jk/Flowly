@@ -42,6 +42,7 @@ export default function LeadResearchPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [active, setActive] = useState<LeadResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [n8nStatus, setN8nStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking')
   
   const id = useId()
   const ref = useRef<HTMLDivElement>(null)
@@ -54,7 +55,18 @@ export default function LeadResearchPage() {
     loadSearchHistory()
     const stored = localStorage.getItem('lead-research-memory')
     if (stored) setSearchMemory(JSON.parse(stored))
+    checkN8nStatus()
   }, [])
+
+  const checkN8nStatus = async () => {
+    try {
+      const response = await fetch('/api/lead-research', { method: 'GET' })
+      const data = await response.json()
+      setN8nStatus(data.configuration?.connectivity === 'Connected' ? 'connected' : 'disconnected')
+    } catch {
+      setN8nStatus('disconnected')
+    }
+  }
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -186,12 +198,22 @@ export default function LeadResearchPage() {
       <AnimatePresence>
         {active && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/80 z-50" />
+            <motion.div 
+              initial={{ opacity: 0, backdropFilter: "blur(0px)" }} 
+              animate={{ opacity: 1, backdropFilter: "blur(8px)" }} 
+              exit={{ opacity: 0, backdropFilter: "blur(0px)" }} 
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-md z-50" 
+            />
             <div className="fixed inset-0 grid place-items-center z-[100]">
               <motion.div
                 layoutId={`card-${active.id}-${id}`}
                 ref={ref}
-                className="w-full max-w-[600px] max-h-[90%] sm:rounded-3xl overflow-auto border border-gray-700"
+                className="w-full max-w-[600px] max-h-[90%] sm:rounded-3xl overflow-auto border border-gray-700 bg-gray-900/95 backdrop-blur-xl shadow-2xl"
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-6">
@@ -246,6 +268,34 @@ export default function LeadResearchPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* N8N Status Indicator */}
+        <div className="mb-6 p-4 rounded-lg border border-gray-700 bg-gray-800/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${n8nStatus === 'connected' ? 'bg-green-500 animate-pulse' : n8nStatus === 'disconnected' ? 'bg-red-500' : 'bg-yellow-500 animate-pulse'}`} />
+              <span className="text-white font-medium">
+                N8N Workflow Status: 
+                {n8nStatus === 'connected' && <span className="text-green-400 ml-2">Connected & Ready</span>}
+                {n8nStatus === 'disconnected' && <span className="text-red-400 ml-2">Disconnected</span>}
+                {n8nStatus === 'checking' && <span className="text-yellow-400 ml-2">Checking...</span>}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={checkN8nStatus}
+              className="text-gray-400 hover:text-white"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+          {n8nStatus === 'disconnected' && (
+            <p className="text-gray-400 text-sm mt-2">
+              N8N automation is offline. Results will use cached or mock data.
+            </p>
+          )}
+        </div>
+
         {/* Search Section */}
         <div className="mb-8 p-6 rounded-lg border border-gray-700">
           <Label className="text-white text-lg font-medium">Research Keywords</Label>

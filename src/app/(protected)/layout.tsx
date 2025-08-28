@@ -1,6 +1,7 @@
 'use client'
 import AuthGuard from '@/components/auth-guard'
-import FloatingMiniTimer from '@/components/floating-mini-timer'
+import DraggableMiniTimer from '@/components/draggable-mini-timer'
+import TimerRestoreButton from '@/components/timer-restore-button'
 import { Toaster } from 'sonner'
 
 export default function ProtectedLayout({
@@ -11,7 +12,8 @@ export default function ProtectedLayout({
   return (
     <AuthGuard>
       {children}
-      <FloatingMiniTimer />
+      <DraggableMiniTimer />
+      <TimerRestoreButton />
       <Toaster position="top-right" richColors />
     </AuthGuard>
   )
