@@ -11,7 +11,8 @@ import {
   Settings,
   LogOut,
   Search,
-  Kanban
+  Kanban,
+  Twitter
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
@@ -61,6 +62,12 @@ export default function NavigationDock() {
       label: "Lead Research",
       href: "/lead-research",
       isActive: pathname === "/lead-research"
+    },
+    {
+      icon: Twitter,
+      label: "Viral Posts",
+      href: "/viral-posts",
+      isActive: pathname === "/viral-posts"
     },
     {
       icon: Folder,

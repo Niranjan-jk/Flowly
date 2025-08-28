@@ -351,15 +351,15 @@ export default function AppTimeTracker() {
                       </div>
 
                       {/* App Info */}
-                      <div className="flex-1 min-w-0 overflow-hidden">
-                        <div className="flex items-center gap-1">
-                          <span className="text-white font-medium text-sm truncate block">{app.name}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="text-white font-medium text-sm truncate min-w-0">{app.name}</span>
                           {app.isActive && (
                             <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse flex-shrink-0" />
                           )}
                         </div>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <Badge variant="outline" className={cn("text-xs px-1 py-0 h-4 flex-shrink-0", getCategoryColor(app.category))}>
+                        <div className="flex items-center gap-1 mt-0.5 min-w-0">
+                          <Badge variant="outline" className={cn("text-xs px-1 py-0 h-4 flex-shrink-0 truncate", getCategoryColor(app.category))}>
                             {app.category}
                           </Badge>
                         </div>
