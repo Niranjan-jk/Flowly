@@ -2,6 +2,7 @@ import { Inconsolata } from "next/font/google";
 import { Toaster } from "@/components/sonner";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { CalendarProvider } from "@/components/calendar-context";
+import { PomodoroProvider } from "@/contexts/pomodoro-context";
 import { Metadata } from "next";
 import "./globals.css";
 
@@ -42,7 +43,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CalendarProvider>{children}</CalendarProvider>
+          <PomodoroProvider>
+            <CalendarProvider>{children}</CalendarProvider>
+          </PomodoroProvider>
           <Toaster />
         </ThemeProvider>
       </body>

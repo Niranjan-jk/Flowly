@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import { MagicCard } from '@/components/magicui/magic-card'
 import { RainbowButton } from '@/components/magicui/rainbow-button'
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text'
@@ -26,167 +26,43 @@ import {
   Timer
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { usePomodoro } from '@/contexts/pomodoro-context'
 import { toast } from 'sonner'
 
-interface PomodoroSettings {
-  workDuration: number
-  shortBreakDuration: number
-  longBreakDuration: number
-  cyclesBeforeLongBreak: number
-  soundEnabled: boolean
-}
-
-type TimerMode = 'work' | 'shortBreak' | 'longBreak'
-
 export default function PomodoroTimer() {
-  const [isActive, setIsActive] = useState(false)
-  const [seconds, setSeconds] = useState(25 * 60) // Default 25 minutes
-  const [mode, setMode] = useState<TimerMode>('work')
-  const [completedCycles, setCompletedCycles] = useState(0)
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [settings, setSettings] = useState<PomodoroSettings>({
-    workDuration: 25,
-    shortBreakDuration: 5,
-    longBreakDuration: 15,
-    cyclesBeforeLongBreak: 4,
-    soundEnabled: true
-  })
+  const {
+    isActive,
+    seconds,
+    mode,
+    completedCycles,
+    settings,
+    toggleTimer,
+    resetTimer,
+    updateSettings,
+    formatTime,
+    getProgress,
+    getModeInfo
+  } = usePomodoro()
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [settingsOpen, setSettingsOpen] = React.useState(false)
+  const [tempSettings, setTempSettings] = React.useState(settings)
 
-  // Initialize audio
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmVAAwCR4GaBh') // Simple beep sound
-    }
-  }, [])
-
-  useEffect(() => {
-    if (isActive && seconds > 0) {
-      intervalRef.current = setInterval(() => {
-        setSeconds(seconds => seconds - 1)
-      }, 1000)
-    } else if (isActive && seconds === 0) {
-      // Timer completed
-      handleTimerComplete()
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
-  }, [isActive, seconds])
-
-  const handleTimerComplete = () => {
-    setIsActive(false)
-    
-    // Play sound if enabled
-    if (settings.soundEnabled && audioRef.current) {
-      audioRef.current.play().catch(e => console.log('Audio play failed:', e))
-    }
-
-    if (mode === 'work') {
-      const newCompletedCycles = completedCycles + 1
-      setCompletedCycles(newCompletedCycles)
-      
-      // Determine next mode
-      if (newCompletedCycles % settings.cyclesBeforeLongBreak === 0) {
-        setMode('longBreak')
-        setSeconds(settings.longBreakDuration * 60)
-        toast.success(`Work session complete! Time for a long break (${settings.longBreakDuration} min)`, {
-          description: `Completed ${newCompletedCycles} work sessions`
-        })
-      } else {
-        setMode('shortBreak')
-        setSeconds(settings.shortBreakDuration * 60)
-        toast.success(`Work session complete! Time for a short break (${settings.shortBreakDuration} min)`, {
-          description: `Completed ${newCompletedCycles} work sessions`
-        })
-      }
-    } else {
-      // Break completed, back to work
-      setMode('work')
-      setSeconds(settings.workDuration * 60)
-      toast.success('Break time over! Ready for another work session?', {
-        description: 'Stay focused and productive!'
-      })
-    }
-  }
-
-  const toggleTimer = () => {
-    setIsActive(!isActive)
-  }
-
-  const resetTimer = () => {
-    setIsActive(false)
-    if (mode === 'work') {
-      setSeconds(settings.workDuration * 60)
-    } else if (mode === 'shortBreak') {
-      setSeconds(settings.shortBreakDuration * 60)
-    } else {
-      setSeconds(settings.longBreakDuration * 60)
-    }
-  }
-
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = totalSeconds % 60
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-  }
-
-  const getProgress = () => {
-    let totalTime: number
-    if (mode === 'work') {
-      totalTime = settings.workDuration * 60
-    } else if (mode === 'shortBreak') {
-      totalTime = settings.shortBreakDuration * 60
-    } else {
-      totalTime = settings.longBreakDuration * 60
-    }
-    return ((totalTime - seconds) / totalTime) * 100
-  }
-
-  const getModeInfo = () => {
-    switch (mode) {
-      case 'work':
-        return {
-          title: 'Focus Time',
-          icon: Briefcase,
-          color: 'from-blue-500 to-purple-600',
-          bgColor: 'bg-blue-500/10'
-        }
-      case 'shortBreak':
-        return {
-          title: 'Short Break',
-          icon: Coffee,
-          color: 'from-green-500 to-emerald-600',
-          bgColor: 'bg-green-500/10'
-        }
-      case 'longBreak':
-        return {
-          title: 'Long Break',
-          icon: Timer,
-          color: 'from-orange-500 to-red-600',
-          bgColor: 'bg-orange-500/10'
-        }
-    }
-  }
+  React.useEffect(() => {
+    setTempSettings(settings)
+  }, [settings])
 
   const modeInfo = getModeInfo()
-  const IconComponent = modeInfo.icon
+  const getIconComponent = () => {
+    switch (mode) {
+      case 'work': return Briefcase
+      case 'shortBreak': return Coffee
+      case 'longBreak': return Timer
+    }
+  }
+  const IconComponent = getIconComponent()
 
   const saveSettings = () => {
-    // Reset timer to new work duration if currently in work mode
-    if (mode === 'work') {
-      setSeconds(settings.workDuration * 60)
-      setIsActive(false)
-    }
+    updateSettings(tempSettings)
     setSettingsOpen(false)
     toast.success('Settings saved successfully!')
   }
@@ -224,8 +100,8 @@ export default function PomodoroTimer() {
                     type="number"
                     min="1"
                     max="60"
-                    value={settings.workDuration}
-                    onChange={(e) => setSettings(prev => ({
+                    value={tempSettings.workDuration}
+                    onChange={(e) => setTempSettings(prev => ({
                       ...prev,
                       workDuration: parseInt(e.target.value) || 25
                     }))}
@@ -238,8 +114,8 @@ export default function PomodoroTimer() {
                     type="number"
                     min="1"
                     max="30"
-                    value={settings.shortBreakDuration}
-                    onChange={(e) => setSettings(prev => ({
+                    value={tempSettings.shortBreakDuration}
+                    onChange={(e) => setTempSettings(prev => ({
                       ...prev,
                       shortBreakDuration: parseInt(e.target.value) || 5
                     }))}
@@ -252,8 +128,8 @@ export default function PomodoroTimer() {
                     type="number"
                     min="1"
                     max="60"
-                    value={settings.longBreakDuration}
-                    onChange={(e) => setSettings(prev => ({
+                    value={tempSettings.longBreakDuration}
+                    onChange={(e) => setTempSettings(prev => ({
                       ...prev,
                       longBreakDuration: parseInt(e.target.value) || 15
                     }))}
@@ -266,8 +142,8 @@ export default function PomodoroTimer() {
                     type="number"
                     min="2"
                     max="10"
-                    value={settings.cyclesBeforeLongBreak}
-                    onChange={(e) => setSettings(prev => ({
+                    value={tempSettings.cyclesBeforeLongBreak}
+                    onChange={(e) => setTempSettings(prev => ({
                       ...prev,
                       cyclesBeforeLongBreak: parseInt(e.target.value) || 4
                     }))}
@@ -278,13 +154,13 @@ export default function PomodoroTimer() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setSettings(prev => ({
+                    onClick={() => setTempSettings(prev => ({
                       ...prev,
                       soundEnabled: !prev.soundEnabled
                     }))}
                     className="text-gray-400 hover:text-white"
                   >
-                    {settings.soundEnabled ? (
+                    {tempSettings.soundEnabled ? (
                       <Volume2 className="h-4 w-4" />
                     ) : (
                       <VolumeX className="h-4 w-4" />
@@ -369,10 +245,10 @@ export default function PomodoroTimer() {
           <Button
             variant="ghost"
             size="lg"
-            onClick={() => setSettings(prev => ({
-              ...prev,
-              soundEnabled: !prev.soundEnabled
-            }))}
+            onClick={() => updateSettings({
+              ...settings,
+              soundEnabled: !settings.soundEnabled
+            })}
             className="text-gray-400 hover:text-white"
           >
             {settings.soundEnabled ? (
