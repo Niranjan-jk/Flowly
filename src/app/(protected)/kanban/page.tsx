@@ -5,7 +5,6 @@ import NavigationDock from '@/components/navigation-dock';
 import { AnimatedShinyText } from '@/components/magicui/animated-shiny-text';
 import { RainbowButton } from '@/components/magicui/rainbow-button';
 import PomodoroTimer from '@/components/pomodoro-timer';
-import AppTimeTracker from '@/components/app-time-tracker';
 import { Button } from '@/components/ui/button';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -520,11 +519,10 @@ export default function KanbanPage() {
 
       {/* Main Content - Side by Side Layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - Pomodoro Timer and App Tracker */}
+        {/* Left Sidebar - Pomodoro Timer */}
         <div className="w-96 flex-shrink-0 p-6 border-r border-border">
           <div className="sticky top-6 space-y-6">
             <PomodoroTimer />
-            <AppTimeTracker />
           </div>
         </div>
         

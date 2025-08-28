@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // N8n Configuration - Multiple URL formats to try
-const N8N_BASE_URL = process.env.N8N_BASE_URL || 'https://n8n.harveyn8n.xyz'
-const N8N_WEBHOOK_ID = 'a6fd75b8-81ca-4002-b17e-cce580bf6769' // From Megatron.json
-const N8N_API_KEY = process.env.N8N_API_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYzhlZDU5My03YjBjLTQ4NmEtYjhkZS05ODlkNGZiYTY1MDkiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1MDI2MDU1LCJleHAiOjE3NjAyMDc0MDB9.mRBkOgnOokKsTCq5M7JrdkQ04NCYBtOG6gzrOEF7gmc'
+const N8N_BASE_URL = process.env.N8N_BASE_URL || 'http://localhost:5678'
+const N8N_API_KEY = process.env.N8N_API_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YjE2MTMyMS0xMzdlLTRiNWItYTQyMi04YzllZGM4NWMwZmQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU2NDA5MDE5fQ.pqcBtFA4MaG1rIbxUnQmU12S7gvjWJbETgH9sgMEPmw'
 const ENABLE_MOCK_MODE = process.env.NODE_ENV === 'development' && process.env.N8N_MOCK_MODE === 'true'
 
 // Multiple webhook URL formats to try
 const getWebhookUrls = () => [
-  `${N8N_BASE_URL}/webhook/${N8N_WEBHOOK_ID}`,
-  `${N8N_BASE_URL}/webhook/lead-research`,
-  `${N8N_BASE_URL}/webhook-test/${N8N_WEBHOOK_ID}`,
-  `${N8N_BASE_URL}/webhook-test/lead-research`
+  `${N8N_BASE_URL}/webhook/youtube-lead-research`, // Production webhook
+  `${N8N_BASE_URL}/webhook-test/youtube-lead-research` // Test webhook
 ]
 
 // Mock data for development/fallback

@@ -12,7 +12,10 @@ import {
   Settings, 
   FileText,
   Folder,
-  User
+  User,
+  Search,
+  Kanban,
+  Twitter
 } from "lucide-react"
 
 interface BentoGridProps {
@@ -58,21 +61,30 @@ export default function DashboardBentoGrid({ className }: BentoGridProps) {
       className: "col-span-3 lg:col-span-2"
     },
     {
-      name: "Mail Center",
-      description: "Centralized inbox for all communications",
+      name: "Lead Research",
+      description: "AI-powered lead research and prospect discovery",
       background: <SkeletonFive />,
-      Icon: Mail,
-      href: "/mail",
-      cta: "Open Mail",
+      Icon: Search,
+      href: "/lead-research",
+      cta: "Research Leads",
       className: "col-span-3 lg:col-span-1"
     },
     {
-      name: "Asset Management",
-      description: "Organize and manage your digital assets",
+      name: "Kanban Board",
+      description: "Visual task management and workflow organization",
       background: <SkeletonSix />,
-      Icon: Folder,
-      href: "/assets",
-      cta: "Manage Assets",
+      Icon: Kanban,
+      href: "/kanban",
+      cta: "Open Board",
+      className: "col-span-3 lg:col-span-1"
+    },
+    {
+      name: "Viral Posts",
+      description: "Generate viral Twitter content with AI assistance",
+      background: <SkeletonSeven />,
+      Icon: Twitter,
+      href: "/viral-posts",
+      cta: "Create Posts",
       className: "col-span-3 lg:col-span-1"
     }
   ]
@@ -187,6 +199,14 @@ const SkeletonSix = () => {
           "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12",
         )}
       />
+    </div>
+  )
+}
+
+const SkeletonSeven = () => {
+  return (
+    <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 relative overflow-hidden">
+      <Ripple />
     </div>
   )
 }
