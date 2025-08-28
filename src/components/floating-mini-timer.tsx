@@ -57,7 +57,7 @@ export default function FloatingMiniTimer() {
     <div className="fixed bottom-6 right-6 z-[100]">
       <div className={cn(
         "flex items-center gap-3 p-4 rounded-xl border border-gray-700 shadow-2xl backdrop-blur-md transition-all duration-300",
-        "bg-gray-900/95 hover:bg-gray-800/95",
+        " hover:bg-gray-800/95",
         modeInfo.bgColor,
         isActive && "shadow-purple-500/25"
       )}>

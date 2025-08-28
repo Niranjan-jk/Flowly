@@ -191,7 +191,7 @@ export default function LeadResearchPage() {
               <motion.div
                 layoutId={`card-${active.id}-${id}`}
                 ref={ref}
-                className="w-full max-w-[600px] max-h-[90%] bg-gray-900 sm:rounded-3xl overflow-auto border border-gray-700"
+                className="w-full max-w-[600px] max-h-[90%] sm:rounded-3xl overflow-auto border border-gray-700"
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-6">
