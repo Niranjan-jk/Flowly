@@ -520,7 +520,7 @@ export default function KanbanPage() {
       {/* Main Content - Side by Side Layout */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar - Pomodoro Timer */}
-        <div className="w-96 flex-shrink-0 p-6 border-r border-border bg-gray-950/50">
+        <div className="w-96 flex-shrink-0 p-6 border-r border-border">
           <div className="sticky top-6">
             <PomodoroTimer />
           </div>
